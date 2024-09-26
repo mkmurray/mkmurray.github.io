@@ -1,0 +1,378 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Mike Murray</title>
+	<meta name="author" content="Mike Murray">
+
+	
+	<meta name="description" content="So I have been tackling a build problem with some humongous deployment builds in Visual Studio.&#160; In reality, VS Deployment Projects are not &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="http://feeds.feedburner.com/mkmurray/" rel="alternate" title="Mike Murray" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	<link href='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/styles/shCore.min.css' rel='stylesheet' type='text/css'/>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/styles/shThemeRDark.min.css' rel='stylesheet' type='text/css'/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shCore.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shAutoloader.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushCpp.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushCSharp.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushCss.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushJScript.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushPlain.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushPowerShell.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushRuby.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushSql.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushXml.min.js' type='text/javascript'></script>
+<script type='text/javascript'>
+     SyntaxHighlighter.config.bloggerMode = true;
+     SyntaxHighlighter.all();
+</script>
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2008/06/18/build-problems-with-a-very-large-visual-studio-deployment-project/">Build Problems With a Very Large Visual Studio Deployment Project</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-06-18T17:24:00-06:00" pubdate data-updated="true">Jun 18<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/-net/'>.NET</a>, <a class='category' href='/blog/categories/build/'>Build</a>, <a class='category' href='/blog/categories/deployment-and-installers/'>Deployment and Installers</a>, <a class='category' href='/blog/categories/error/'>Error</a>, <a class='category' href='/blog/categories/msi/'>MSI</a>, <a class='category' href='/blog/categories/microsoft/'>Microsoft</a>, <a class='category' href='/blog/categories/virtual-machine/'>Virtual Machine</a>, <a class='category' href='/blog/categories/visual-studio/'>Visual Studio</a>, <a class='category' href='/blog/categories/windows/'>Windows</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2008/06/18/build-problems-with-a-very-large-visual-studio-deployment-project/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<div class='post'>
+<p>So I have been tackling a build problem with some humongous deployment builds in Visual Studio.&#160; In reality, VS Deployment Projects are not ideal for even slightly sophisticated MSI installers; but we&#8217;ve gone far enough down this path that we can&#8217;t make the switch at the moment.&#160; So please choose something with more control like the <a href="http://wix.sourceforge.net/">Microsoft-sponsored open-source project WiX</a> or a well-established, paid product like <a href="http://www.acresso.com/products/installation/installshield.htm">InstallShield</a>.</p>  <p>So the error I kept getting was &quot;<font face="Courier New">Not enough storage is available to complete this operation</font>&quot; and it would list some file (not the same every time).&#160; It appears the error means the build process ran out of virtual memory or something.&#160; So I found something interesting about default limit of 2 GB for any Windows process and how to raise that limit.&#160; That process is discussed in this post:&#160; <a title="http://murrayon.net/2007/12/building-monster-vs-2005-or-2008.html" href="http://murrayon.net/2007/12/building-monster-vs-2005-or-2008.html">http://murrayon.net/2007/12/building-monster-vs-2005-or-2008.html</a></p> <span class='fullpost'> <p>Well, it has worked on one guy&#8217;s laptop this whole time and it only worked for about 2 days on my machine (then it started getting an error that said &quot;<font face="Courier New">Unrecoverable build error</font>&quot; and was accompanied with a &quot;<font face="Courier New">Send Error Report</font>&quot; dialog).&#160; I also tried the fix on like 3 other machines without any success at all (in fact many of the machines become highly unstable with the <font face="Courier New">3GB</font> Windows boot switch).&#160; So for 6 months, I couldn&#8217;t figure out why it would work on that one machine and none of the others.&#160; Well, just recently that guy&#8217;s laptop joined the domain and started using a domain user account (I have no clue why he wasn&#8217;t from the beginning, but I digress).&#160; His machine didn&#8217;t become unstable, but it did quit building our monster deployment build.&#160; We thought we were up a creek with no box to build the MSI installer and a deadline fast approaching.&#160; We got it working on his laptop by going back to a local user account.</p>  <p>Well, that got me thinking about how we could get another PC to be able to do the darn build.&#160; I tried the build on my PC with just a local user account, but that didn&#8217;t work because I don&#8217;t currently have the other fix named above.&#160; So I created a virtual machine (in case things got unstable again) and didn&#8217;t add it to the domain, just to be safe.&#160; I did the fix named above, and am now able to successfully build this MSI install consistently under a local user account without getting the &quot;<font face="Courier New">Not enough storage is available</font>&quot; error message.&#160; The details of this adventure are discussed in this post:&#160; <a title="http://murrayon.net/2007/12/build-error-when-building-very-large-vs.html" href="http://murrayon.net/2007/12/build-error-when-building-very-large-vs.html">http://murrayon.net/2007/12/build-error-when-building-very-large-vs.html</a></p>  <p>Maybe in a few months we&#8217;ll move this installer build process to WiX and avoid the inflexibility we are running into with Visual Studio Deployment Projects.</p> </span>  </div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Anonymous</div>
+<div class='content'>
+I was running into the same &#8216;Unrecoverable build error&#8217; when trying to build a VS2008 deployment project. Tried all of the fixes you mentioned - regsrv32, MSDN knowledge base fixes, etc. Nothing worked. Then just on a hunch I went into the $User\AppData\Local\Temp directory and noticed that there were about 6GB of temp files there. Deleted those, and bingo - working build!</div>
+</div>
+</div>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2008/06/12/display-name-in-add-remove-programs-msi-installed-products-and-compressed-guids/">Display Name in Add/Remove Programs, MSI-Installed Products, and Compressed GUIDs</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-06-12T15:52:00-06:00" pubdate data-updated="true">Jun 12<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/add-remove-programs/'>Add/Remove Programs</a>, <a class='category' href='/blog/categories/deployment-and-installers/'>Deployment and Installers</a>, <a class='category' href='/blog/categories/guid/'>GUID</a>, <a class='category' href='/blog/categories/msi/'>MSI</a>, <a class='category' href='/blog/categories/microsoft/'>Microsoft</a>, <a class='category' href='/blog/categories/patching-updating/'>Patching/Updating</a>, <a class='category' href='/blog/categories/registry/'>Registry</a>, <a class='category' href='/blog/categories/windows/'>Windows</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2008/06/12/display-name-in-add-remove-programs-msi-installed-products-and-compressed-guids/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<div class='post'>
+<p>I was trying to rename a product&#8217;s display name found in its ARP (Add/Remove Programs) entry.&#160; There is a registry key that lists just about every product installed on your machine:</p>  <p><font face="Courier New">HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall</font></p>  <p>Most (if not all) MSI-installed products have an entry under this key that is the <font face="Courier New">ProductCode</font> GUID.&#160; Every product under this key seems to have a <font face="Courier New">DisplayName</font> value, some of which you can modify and it will show the change in ARP.&#160; However, it appeared any product installed via MSI did not work this way.&#160; So I went registry hunting for any other entries the MSI installers might create.&#160; I found the following location:</p>  <p><font face="Courier New">HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Installer</font></p>  <p>This key has many helpful sub-keys (including <font face="Courier New">Assemblies</font>, <font face="Courier New">Components</font>, <font face="Courier New">Features</font>, <font face="Courier New">Patches</font>, <font face="Courier New">Products</font>, and <font face="Courier New">UpgradeCodes</font>); the <font face="Courier New">Products</font> sub-key is the most important to me at the moment.&#160; Under this sub-key there are many entries (not as many as the first location I mentioned; these appear to MSI only products) that appear to be GUIDs without hyphens and braces.&#160; However, the key that represented the product I was interested in didn&#8217;t match the <font face="Courier New">ProductCode</font> I had.&#160; But in one of the values, there was a <font face="Courier New">PackageCode</font> that was indeed the correct package GUID (different than <font face="Courier New">ProductCode</font>) and the <font face="Courier New">ProductName</font> matched as well.&#160; Turns out for MSI-installed products I could change this <font face="Courier New">ProductName</font> value and it would make the change to its ARP entry.</p> <span class='fullpost'> <p>But I was puzzled how I would know which entry to pick for any given product under this <font face="Courier New">Products</font> sub-key.&#160; I ended up coming across this blog post that explained what these different GUIDs are (called <font face="Courier New">Compressed GUIDs</font>); focus on the &quot;<strong>UPDATE</strong>&quot; section by John Walker:</p>  <p><a title="http://www.hanselman.com/blog/BATCHFILEVOODOODetermineIfMultipleAndWhichVersionsOfAnMSIinstalledProductAreInstalledUsingUpgradeCode.aspx" href="http://www.hanselman.com/blog/BATCHFILEVOODOODetermineIfMultipleAndWhichVersionsOfAnMSIinstalledProductAreInstalledUsingUpgradeCode.aspx">http://www.hanselman.com/blog/BATCHFILEVOODOODeterm&#8230;..UsingUpgradeCode.aspx</a></p>  <p>And then John Walker&#8217;s update mentions this link that explains how to convert back and forth between regular and Compressed GUIDs:</p>  <p><a title="http://www.appdeploy.com/messageboards/tm.asp?m=11996&amp;mpage=1⼅" href="http://www.appdeploy.com/messageboards/tm.asp?m=11996&amp;mpage=1⼅">http://www.appdeploy.com/messageboards/tm.asp?m=11996&amp;mpage=1&amp;#12037</a></p>  <p>Basically you break up the GUID into groupings and reverse them.&#160; See below:</p>  <ul>   <li><u>Original GUID</u>:&#160; {abcdefgh-ijkl-mnop-qrst-uvwxyz123456} </li>    <li><u>Groupings</u>:&#160; abcdefgh ijkl mnop qr st uv wx yz 12 34 56 </li>    <li><u>Reversed Groupings</u>:&#160; hgfedcba lkji ponm rq ts vu xw zy 21 43 65 </li>    <li><u>Compressed GUID</u>:&#160; hgfedcbalkjiponmrqtsvuxwzy214365 </li> </ul>  <p>Don&#8217;t know why Microsoft chose to butcher up GUIDs like this, but it&#8217;s nice to know.</p> </span>  </div>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2008/06/12/finding-microsoft-office-s-install-location/">Finding Microsoft Office&#8217;s Install Location</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-06-12T13:59:00-06:00" pubdate data-updated="true">Jun 12<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/deployment-and-installers/'>Deployment and Installers</a>, <a class='category' href='/blog/categories/microsoft/'>Microsoft</a>, <a class='category' href='/blog/categories/office/'>Office</a>, <a class='category' href='/blog/categories/registry/'>Registry</a>, <a class='category' href='/blog/categories/windows/'>Windows</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2008/06/12/finding-microsoft-office-s-install-location/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<div class='post'>
+<p>One of my co-workers, in trying to find the install location of <font face="Courier New">Microsoft Word</font>, found a cool little registry tree.&#160; Here is the key:</p>  <p><font face="Courier New">HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Applications</font></p>  <p>Underneath this key, there are keys named <font face="Courier New">Winword.exe</font>, <font face="Courier New">EXCEL.EXE</font>, <font face="Courier New">Outlook.EXE</font>, <font face="Courier New">MSACCESS.EXE</font>, <font face="Courier New">POWERPNT.EXE</font>, <font face="Courier New">explorer.exe</font>, <font face="Courier New">iexplore.exe</font>, <font face="Courier New">AcroRD32.exe</font>, <font face="Courier New">iTunes.exe</font>, <font face="Courier New">javaw.exe</font>, and so on.&#160; It appears many of the big companies use this area to put information about how to do certain commands for a product from a shell (like open, edit, print, etc.).</p>  <p>My next post will be about another section under <font face="Courier New">SOFTWARE\Classes</font> that I discovered.</p>  </div>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2008/06/12/launching-msiexec-exe-from-c/">Launching MSIExec.exe From C#</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-06-12T13:21:00-06:00" pubdate data-updated="true">Jun 12<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/-net/'>.NET</a>, <a class='category' href='/blog/categories/add-remove-programs/'>Add/Remove Programs</a>, <a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/deployment-and-installers/'>Deployment and Installers</a>, <a class='category' href='/blog/categories/error/'>Error</a>, <a class='category' href='/blog/categories/msi/'>MSI</a>, <a class='category' href='/blog/categories/microsoft/'>Microsoft</a>, <a class='category' href='/blog/categories/patching-updating/'>Patching/Updating</a>, <a class='category' href='/blog/categories/threading/'>Threading</a>, <a class='category' href='/blog/categories/windows/'>Windows</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2008/06/12/launching-msiexec-exe-from-c/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<div class='post'>
+<p>I ran into a problem with trying to spawn off a process to launch an <font face="Courier New">MSIExec.exe</font> command from C#.&#160; I wanted to launch the process and then wait for it to finish before proceeding; however,&#160; it was always returned immediately before the install or uninstall was really finished.&#160; I confirmed this behavior with this blog entry:&#160; <a title="http://blogs.msdn.com/heaths/archive/2005/11/15/493236.aspx" href="http://blogs.msdn.com/heaths/archive/2005/11/15/493236.aspx">http://blogs.msdn.com/heaths/archive/2005/11/15/493236.aspx</a></p>  <p>The author suggests &quot;<font face="Courier New">start /wait</font>&quot; which works from the command line or a batch file.&#160; I did verify it works launching a batch file or two from C#, but I preferred to keep in C# as much as possible.&#160; Also, I was trying to accomplish a silent background process running the <font face="Courier New">MSIExec</font> commands.&#160; However, C# can&#8217;t just start a process calling &quot;<font face="Courier New">start</font>,&quot; which is an internal command to the Command Prompt I guess.</p>  <p>Someone reminded me on a message board that you can start a process using <font face="Courier New">CMD.exe</font>, calling &quot;<font face="Courier New">start</font>&quot; like this:</p> <span class='fullpost'> <p><pre class="code"><span style="color: #2b91af">ProcessStartInfo </span>startInfo = <span style="color: blue">new </span><span style="color: #2b91af">ProcessStartInfo</span>(
+    <span style="color: #a31515">&quot;cmd.exe&quot;</span>,
+    <span style="color: blue">string</span>.Format(<span style="color: #a31515">&quot;/c start /MIN /wait msiexec.exe /x {0} /quiet&quot;</span>, guid));
+startInfo.WindowStyle = <span style="color: #2b91af">ProcessWindowStyle</span>.Hidden;
+
+<span style="color: #2b91af">Process </span>process = <span style="color: #2b91af">Process</span>.Start(startInfo);
+process.WaitForExit();</pre></p> <p>It works like a charm.&#160; I don&#8217;t think you even need the &quot;<font face="Courier New">/MIN</font>&quot; flag for &quot;<font face="Courier New">start</font>&quot; anyway.</p>
+</span>  </div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Tyler Collier</div>
+<div class='content'>
+Thanks for this.  Great idea.  Worked for me.</div>
+</div>
+<div class='comment'>
+<div class='author'>chavakiran</div>
+<div class='content'>
+You could use process.WaitForExit() isn&#39;t it?</div>
+</div>
+</div>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2008/04/17/expelled-an-investigative-documentary/">Expelled - an Investigative Documentary</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-04-17T14:22:00-06:00" pubdate data-updated="true">Apr 17<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/news-and-politics/'>News and Politics</a>, <a class='category' href='/blog/categories/personal/'>Personal</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2008/04/17/expelled-an-investigative-documentary/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<div class='post'>
+<p></p>  <p>So I won&#8217;t stray from programming entries very often on this blog unless there is something really important I feel needs to be said.</p>  <p>I, for one, am tired of the Michael Moore documentaries that do nothing but complain about how crappy our nation is.&#160; I also am not a fan of Al Gore&#8217;s biased misrepresentation of the facts about Global Warming and his claims that the whole scientific community is behind him; I personally think he doesn&#8217;t care about Global Warming all that much and just loves all this attention and wealth that he is accumulating.&#160; But that is a discussion for another time and place&#8230;</p>  <p>Well, to keep this brief, there is a new documentary coming out in movie theaters around the nation tomorrow by Ben Stein.&#160; It is called <u>Expelled</u>, and it is an investigative documentary around the systematic persecution by &quot;Big Science&quot; against anyone who questions the theory of Darwinism and proposes the idea that there might have been Intelligent Design.&#160; The movie is a campaign to convince &quot;Big Science&quot; of their close-mindedness, and I support this movement and hope it succeeds.</p>  <p>Here are some links if you are interested further:</p>  <ul>   <li>Trailer:&#160; <a href="http://www.youtube.com/watch?v=xGCxbhGaVfE">http://www.youtube.com/watch?v=xGCxbhGaVfE</a> </li>    <li>Movie Theater Locater:&#160; <a title="http://www.expelledthemovie.com/theaterap.php" href="http://www.expelledthemovie.com/theaterap.php">http://www.expelledthemovie.com/theaterap.php</a> </li>    <li>2 Official Web Sites:      <ul>       <li><a href="http://www.getexpelled.com/">http://www.getexpelled.com/</a> </li>        <li><a href="http://www.expelledthemovie.com/">http://www.expelledthemovie.com/</a> </li>     </ul>   </li> </ul>  <p>Ok, back to programming now!</p></div>
+
+		
+		
+	</div>
+
+</article>
+
+<nav id="pagenavi">
+    
+        <a href="/blog/page/11/" class="prev">Prev</a>
+    
+    
+        <a href="/blog/page/13/" class="next">Next</a>
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav></div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2012
+
+    Mike Murray
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+</footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'mkmurray';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-36228026-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+		<div class="left-col">
+			<header id="header" class="inner"><div class="profilepic">	
+	<img src="/images/mkmurray.jpg" alt="Profile Picture">
+</div>
+<h1><a href="/">Mike Murray</a></h1>
+<nav id="main-nav"><ul class="main">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories">Categories</a></li>
+</ul>
+
+<br />
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:mkmurray.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+
+</nav>
+<br/>
+<h3 class="alignleft">please code responsibly</h3>
+<br/>
+<br/>
+<br/>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/mkmurray" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/109073345657761090655?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/mkmurray" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/mkmurray" title="GitHub">GitHub</a>
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/mkmurray">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="http://feeds.feedburner.com/mkmurray/" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+</header>				
+		</div>	
+	</div>
+</body>
+</html>

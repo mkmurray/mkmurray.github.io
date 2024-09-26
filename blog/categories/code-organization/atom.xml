@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Code Organization | Mike Murray]]></title>
+  <link href="http://mkmurray.com/blog/categories/code-organization/atom.xml" rel="self"/>
+  <link href="http://mkmurray.com/"/>
+  <updated>2012-12-15T15:41:41-07:00</updated>
+  <id>http://mkmurray.com/</id>
+  <author>
+    <name><![CDATA[Mike Murray]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[The Value is the Boundary]]></title>
+    <link href="http://mkmurray.com/blog/2012/12/15/the-value-is-the-boundary/"/>
+    <updated>2012-12-15T15:31:00-07:00</updated>
+    <id>http://mkmurray.com/blog/2012/12/15/the-value-is-the-boundary</id>
+    <content type="html"><![CDATA[<p><em>Author's Note: I do not take credit for the phrase used as the title of this
+blog post. It comes from Gary's Ruby Conf 12 video recording entitled
+<u>Boundaries</u> mentioned below and in the previous blog post.</em></p>
+
+<p>In the last blog post <a href="/blog/2012/12/08/testing-trade-offs/">Testing
+Trade-offs</a>, I talked about the
+difficulties of verifying the decisions and dependencies of our classes with the
+current mainstream testing methodologies. Based on a recorded conference talk by
+<a href="https://twitter.com/garybernhardt">Gary Bernhardt</a>, the focus was on
+effectively testing the logic a class contains and the dependent collobrators it
+takes in for coordinating with other classes and objects to perform its
+responsibilities. Mixing the two concerns in the same object definition requires
+utilizing both isolated unit testing and integration/integrated testing in order
+to adequately test cover the class. However, code designed this way seems to
+play to the weaknesses of each testing strategy just as much as it plays to
+their strengths (please see the previous blog post if you would like more
+details on that discussion).</p>
+
+<p>Today let's go one step further and talk about ways that we could more cleanly
+separate the concerns of decisions and dependencies, with the hope that we can
+create objects that better lend themselves to one type of testing over the
+other. Gary proposes that a such a codebase could have better modularity,
+scalability, and even concurrency. I assert that your code will also be more
+maintainable and extensible as well. Most of today's content will take a lesson
+from the functional programming paradigm, including practices they have espoused
+for decades.</p>
+
+<h2>Frictionless Isolated Unit Testing</h2>
+
+<p>If you wanted to test the mathematical addition operator (i.e., the plus sign
+<code>+</code>), what frameworks, tools, and/or coding tricks do you have to employ to
+sufficiently isolate it from all other concerns and objects? Absolutely nothing!
+There are no dependencies to mock or stub; it isolates for free. Why is that?
+Gary cautions against assuming it is because the addition operator is simple and
+lacks complexity. He digs deeper in order to identify two properities the
+implementation of plus sign exhibits that allows it to be naturally isolated.</p>
+
+<p>The first property is that the operator takes values as arguments and returns
+new values as output without any mutation. The second property is that the
+operator requires no dependencies in order to perform its computation and logic.
+Thus there is nothing to mock or stub when testing it, which was the major
+weakness of isolated unit testing. Also because of the lack of dependencies, no
+integrated tests are required in order to better test how the operator will
+behave in a production environment where there are no mocks and stubs. To test
+the addition operator we merely need to write simple pass-values-in,
+assert-value-out tests with no extra setup required.</p>
+
+<p>As Gary applies these concepts to existing code, we notice a few changes. Pieces
+of domain logic and pieces of code that coordinate dependencies are separated
+from each other, broken out into new objects created for a single purpose and
+responsibility. The nature of the communication between objects also changed,
+with values (inputs and outputs) becoming the boundary between objects instead
+of the emphasis being on several synchronous method calls. Value objects focused
+on data (and not behavior) become the new contract between collaborating
+classes.</p>
+
+<h2>To Be Continued...</h2>
+
+<p>You may notice that many of these concepts have a functional programming
+influence. The properties of immutability and focus on data at the boundaries
+allow us to write code that isolates very easily and lends itself very well to
+isolated unit testing that is simple and not brittle. It is very good at
+verifying the domain logic and decision paths of our objects. Of course, we
+can't write the entirety of our codebase in this manner with no dependencies
+ever. Next time I will discuss a code architecture that Gary proposes which can
+utilize this style of code married with some more imperative glue code that
+coordinates the dependencies in the system. We will also discuss testing those
+portions of code as well.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Testing Trade-offs]]></title>
+    <link href="http://mkmurray.com/blog/2012/12/08/testing-trade-offs/"/>
+    <updated>2012-12-08T21:11:00-07:00</updated>
+    <id>http://mkmurray.com/blog/2012/12/08/testing-trade-offs</id>
+    <content type="html"><![CDATA[<p>Last week our dev team at Extend Health watched a <a href="http://www.youtube.com/watch?v=yTkzNHF6rMs">RubyConf 2012 video of a talk
+entitled Boundaries</a> by <a href="https://twitter.com/garybernhardt">Gary
+Bernhardt</a> of <a href="https://www.destroyallsoftware.com/screencasts">Destroy All
+Software</a> (or perhaps even
+better known for the infamous <a href="https://www.destroyallsoftware.com/talks/wat">WAT lightning talk at CodeMash
+2012</a>). Gary proposes a very
+interesting code architecture that marries the individual benefits of
+immutability &amp; mutability, functional programming &amp; imperative object-oriented
+programming, isolated unit testing &amp; integration testing. He discusses the pros
+&amp; cons of each code design &amp; testing decision and the trade-offs that we end up
+dealing with. He suggests a potential solution that makes virtually no trade-off
+and attempts to harness the advantages of each of these methodologies that
+appear to be at odds with one another. I feel the idea has a lot of merit and I
+highly encourage everyone to watch his presentation to get the full context and
+a better logical progression of his proposal than what I can provide.</p>
+
+<h2>Isolated Unit Testing vs. Integration Testing</h2>
+
+<p>A common practice in unit testing classes and objects is to isolate the targeted
+class from its dependencies so that you can focus solely on its responsibilities
+and domain logic independent of any implementation details of the dependencies.
+This is typically accomplished by the use of stubs and mocks, which attempt to
+control and monitor the interactions with and data return from dependencies.
+There are a ton of gains afforded by this style of testing as Gary points out,
+but one very large criticism of this testing methodology is that it doesn't
+exercise the code in the same way it would run in production. It is not exactly
+rare to have these isolated unit tests successfully pass and yet still have
+problems in production.</p>
+
+<p>Integration testing tends to better emulate production because it maintains the
+interaction relationships between objects in addition to acquiring and passing
+the data around the system in the same way. The criticism Gary puts forth of an
+integrated testing strategy is that it is very slow as you begin to attempt to
+cover all the code paths through the system. Consider trying to cover all
+logical branches through the system, including all branches of
+try/catch/finally, conditional, and looping structures. Gary suggests the growth
+in code to cover these scenarios is 2<sup>n<sup>,</sup></sup> where <code>n</code> is the number of branches.</p>
+
+<p>Many try to get the benefits of both types of testing in order to compensate for
+each strategy's shortcomings. However, they still write code that doesn't play
+to each testing methodolgy's strengths. The strength of isolated unit testing is
+verifying that given certain inputs the expected output is always returned. The
+strength of integration testing is coordinating dependencies, making sure they
+utilize and interact with the API of other objects correctly. If you design your
+classes to be a mix of dependencies and logic, it becomes difficult to
+effectively test cover them without writing both sets of tests for all classes
+in your codebase.</p>
+
+<h2>So What?</h2>
+
+<p>OK, so you are probably wondering what the point is then. This sounds like a
+good plan to just be more disciplined in your test coverage, right? Well, let's
+explore a way to better segregate dependency orchestration from actual logic and
+behavior. This could allow us to use the right testing methodology depending on
+which type of responsibility the object is meant to encapsulate: dependencies or
+decisions? Gary also asserts that it will lead us down a path that could yield a
+codebase with better modularity, scalability, and potentially even concurrency.
+I believe you can also add better maintainability and extensibility to that
+list.</p>
+
+<p>Next week I will dive into how Gary suggests we can better seperate these
+concerns of dependencies and decisions. Stay tuned (or go watch the video and
+spoil the surprise).</p>
+
+<p>Next post: <a href="/blog/2012/12/15/the-value-is-the-boundary/">The Value is the Boundary</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[FubuMVC Behavior Chains - The BMVC Pattern]]></title>
+    <link href="http://mkmurray.com/blog/2011/06/13/fubumvc-behavior-chains-the-bmvc-pattern/"/>
+    <updated>2011-06-13T16:01:00-06:00</updated>
+    <id>http://mkmurray.com/blog/2011/06/13/fubumvc-behavior-chains-the-bmvc-pattern</id>
+    <content type="html"><![CDATA[<div class='post'>
+<p>For the last several months at work, we have been gradually migrating our production website to use the .NET open source <a href="http://fubumvc.com/" target="_blank">FubuMVC web framework</a>. Before committing to a whole new infrastructure for our site, some brilliant talent on our team decided to improve our experience on the ASP.NET MVC framework by integrating in one of FubuMVC’s most compelling features, behavior chains. <a href="https://twitter.com/#!/bob_pace" target="_blank">Bob Pace</a> originally blogged about the process in a two part blog post series (<a href="http://paceyourself.net/2010/08/06/integrating-fubumvc-with-aspnet-mvc-part-1/" target="_blank">part 1</a> and <a href="http://paceyourself.net/2010/08/13/integrating-fubumvc-with-aspnet-mvc-part-2/" target="_blank">part 2</a>); since then, he has <a href="https://github.com/bobpace/MvcToFubu" target="_blank">created a packaged solution called MvcToFubu</a> which he <a href="http://paceyourself.net/2011/06/11/mvctofubu---transition-your-website-from-aspnet-mvc-to-fubumvc-part-1/" target="_blank">just recently started another blog post series about</a>.</p>  <p>Behavior chains are by far my favorite feature of FubuMVC. I believe they single-handedly revolutionized our use of the MVC pattern in a web environment. In fact, I like to think of it as a whole new pattern, the <strong>BMVC Pattern</strong> (I was told by a coworker that the ‘B’ should stand for “Better”, and while that’s true, I’ll stick with “Behaviors”). No, I’m not sincerely trying to coin yet another design or architectural pattern buzzword. However, I am most sincerely not joking when I say behavior chains add a whole new dimension to how I design web architectures. I find myself creating composable pipelines of cohesive, testable components in lieu of monolithic controllers and actions.</p> <span class="fullpost">   <h3>What are Behavior Chains?</h3>    <p>Have you ever looked at your controller actions and thought “Man, there’s a lot going on here!” (validation, authorization, transactions, ORM setup, logging, caching, etc.)? If you haven’t, I urge you to take a conscious look at your controller actions and try to identify code that doesn’t <u>directly</u> relate to the purpose of the page (or sub-view of the page). Shouldn’t there be a way to move some of this secondary infrastructure code out of our controller actions and have it be applied conventionally to the correct actions/routes? Yes, and this is exactly what Behavior Chains are meant to accomplish, the ability to create composable pipelines of reusable behavior nodes for each route in your site.</p>    <p>Behavior chains can be built up in any order you want for each route via Conventions and Policies, which are extension points that allow you to inspect and modify the entire Behavior Graph that was built by FubuMVC during startup bootstrapping. The behavior graph is the modifiable collection of all behavior chains in the site, initially built with just a few default behavior nodes for each route. A typical behavior chain by default usually has an ActionCall node (representing the call to a controller action) and an Output node (often a tie-in to a view rendering engine, but can also be JSON or anything else). Other behavior nodes can be sprinkled into the pipeline in any order in front of or in between the ActionCall and the Output nodes. As mentioned before via the use of Conventions and Policies, it is common practice to filter your list of behavior chains using LINQ extension methods and then add a specific behavior node into the matching chains at a specific location in the chain. This truly elevates coding to conventions to a new level; some of the filtering criteria regarding controller actions that you may come up with could be as follows:</p>    <ul>     <li>Action method names that contain a certain word. </li>      <li>Actions methods that are located in a particular controller or namespace. </li>      <li>Action method signatures that contain an input/output model that implements a specific interface. </li>      <li>Action method signatures that contain an input/output model that contains a property of a certain type or have a particular C# attribute applied to it. </li>      <li>So on, so forth…whatever you can dream up! </li>   </ul>    <p>One more aspect of behavior chains that is important to point out is the logistics in how behavior nodes are chained together. The chains are not merely a linked-list of behavior nodes that are traversed linearly. Instead the makeup of the chains is better conceptualized to be an outer behavior node wrapping around an inner behavior node, which is then itself an outer node wrapped around another inner node, and so on. In fact, the FubuMVC developers like to refer to this chaining architecture as the Onion Layer Model or the Russian Doll Model (conjuring up a mental image of the <a href="http://en.wikipedia.org/wiki/Matryoshka_doll">nesting Russian doll toy called a matryoshka doll or a babushka doll</a>). When an outer behavior node has finished executing it’s logic, it can then optionally execute it’s inner behavior node logic (or stop the behavior chain entirely in order to return early with a response, an error, or even transfer to a different route and behavior chain). One of the key advantages that this wrapping architecture can afford is the ability for an outer behavior to run additional logic or clean up code after all inner behavior nodes have completed (i.e., transactions can be committed, connections can be closed, sessions can be disposed, etc.).</p>    <h3>How does this change the way I code my controllers?</h3>    <p>I find that my controller actions are much thinner and more focused on the base case and the successful code path. All the exceptional code paths and edge cases have been identified and deal with by the other behavior nodes in the chain, prior to my action call being invoked. My action call can now focus on the essential logic that differentiate this route from others. That essential logic doesn’t get lost anymore in the necessary infrastructure code that should be a secondary concern. And all of this logic can be broken up into cohesive, reusable components within a flexible request/response pipeline that can be built up automatically by coding to whatever conventions you deem beneficial. Behavior chains really do add a whole new first-class citizen to the MVC design pattern. Do yourself a favor and check out the MvcToFubu solution mentioned at the top of this post, and bring some FubuMVC behavior chain goodness to your ASP.NET MVC website. I think you might be as impressed as we were and yearn for <a href="http://lostechies.com/chadmyers/2011/05/30/cool-stuff-in-fubucore-and-fubumvc-series/">the other killer features of FubuMVC</a> as well.</p> </span>  </div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Mike Murray</div>
+<div class='content'>
+Thanks for thought! Perhaps I&#39;ll post on the mailing list and see what others think about it being involved in the FubuMVC documentation somewhere.</div>
+</div>
+<div class='comment'>
+<div class='author'>Rex</div>
+<div class='content'>
+Great post, I didn&#39;t see this one when I was writing my post about authentication behavior. This is a great explanation of behavior chains in FubuMVC.<br /><br />This would also be a great intro to behaviors for the fubumvc guides.</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Develop with Passion bootcamp course - Denver 2011]]></title>
+    <link href="http://mkmurray.com/blog/2011/05/31/develop-with-passion-bootcamp-course-denver-2011/"/>
+    <updated>2011-05-31T09:27:00-06:00</updated>
+    <id>http://mkmurray.com/blog/2011/05/31/develop-with-passion-bootcamp-course-denver-2011</id>
+    <content type="html"><![CDATA[<div class='post'>
+<p><a href="http://paceyourself.net/" target="_blank">A very talented coworker</a> and I recently went to JP Boodhoo’s <a href="http://www.jpboodhoo.com/training.oo" target="_blank">Develop with Passion bootcamp training course</a> (previously known as Nothin but .NET). I had originally heard of the course from <a href="http://www.davesquared.net/" target="_blank">Dave Tchepak</a> who <a href="http://www.davesquared.net/2009/08/nothin-but-net-sydney-2009-day-1.html" target="_blank">attended the course nearly two years ago</a>. This blog post is a wrap-up of my thoughts and feelings about the course itself, <a href="http://www.jpboodhoo.com/" target="_blank">JP Boodhoo</a> as the instructor &amp; experienced craftsman, and the .NET development community in general.</p> <span class="fullpost">   <p>My prior impressions of the course from what I had read was that I would be in awe of JP's coding and design skills and very overwhelmed with the feeling that I didn't really know how to code; also that I would get no sleep at all that week, going from early morning to past midnight every day. I had also heard from a previous course member (off the record) that JP’s organization and direction with course material was a bit disorganized back then (luckily this has changed significantly since he had taken the course). I was really excited to see some good BDD in action, get my TDD passion ignited again (I had actually mentioned on twitter recently that my motivation for test was waning as of late), and see JP's mad Vim skills (since I have gotten into that the last few months).</p>    <p>Overall, I was pleasantly surprised with the fulfillment of most of my positive expectations and initial impressions going into the course. JP's personality and passion are infectious, and his teaching skills are pretty top-notch. The course material was well-structured and there was a clear direction for what we hoped to cover throughout the week (and yet, he was still flexible enough to be able to briefly entertain an off-topic direction the students wanted to take the course). He stayed true to the advertised 9am-9pm every day no matter what. He said that when he did the late nighters with previous courses, people came back the next day with little sleep and trashed as far as coding &amp; learning capabilities go.</p>    <p>Watching him code so efficiently is quite a treat. He automates anything he does more than once so that a particular task doesn’t ever get in his way and hold him back the next time. His <a href="http://www.autohotkey.com/" target="_blank">AutoHotkey</a> scripts and automation tools that he has put together are absolutely incredible. He briefly touched the mouse two times the entire week, and it only for when one of his programs or Windows VM was wigging out. Screens and dialogs flew by so fast, you could tell he wasn't going to let any UI (even Visual Studio) get in the way of his productivity to code. He mentioned he will be open sourcing some of his scripts that he uses to keep his development environment consistent across OS platforms. Definitely cool stuff.</p>    <p>As far as JP's actual coding/design skills, I am absolutely floored. He certainly understands C# and .NET well. But it's his Object-Oriented design skills that blew us away. I've realized I don't really know OO design. I think too mechanically about the implementation of the solution instead of focusing on breaking down the problem into smaller manageable chunks. His TDD skills (both Top Down Design and Test Driven Development) are amazing. I've never been a fan of the TDD samples and intros I've seen (where the instructors do the absolute dumbest thing to make the test pass; JP admitted that style didn’t jive with him either). I've always thought that Behavior Driven Development and Top-Down Design were the way to go if I were to have tests drive my designs (or have tests at all for that matter; I'm still having trouble finding enthusiasm for tests written after development for modules and units). So it was great to see a master at that particular craft. It made me excited to use tests as a tool to guide my OO design, behavior discovery, and problem solving.</p>    <p>Some of you may recall that I had <a href="http://murrayon.net/2009/11/anagram-code-kata-bdd-mspec.html" target="_blank">previously investigated BDD, Machine.Specifications, and Top-Down Design a year and a half ago doing the Anagram Code Kata</a>. I think I can recognize better design and responsibility break-up and assignment nowadays. I likely will blog on these subjects again this year with new &amp; improved passion and knowledge.</p>    <p>There was one sad takeaway for me personally from the course, which was a sense of disappointment in the .NET development community in general. Giving myself some time since the course to really think it through, I’m realizing I’m probably being too tough on our community, as I know each Dev community out there suffers from it’s own set of problems. But I don’t want to excuse our shortcomings either; rather, I would like to point them out so that we can focus on them and root those weaknesses out. I think our community in specific is unique in that there is a big shot company that dictates the direction our community should take, sometimes taking credit for all the innovation. Things are improving lately no doubt; it appears Microsoft is listening more and more and trying to let outsiders get involved and contribute.</p>    <p>But we as .NET devs need to step up and take matters into our own hands, we need to take better control of the code we write and encourage best practices within the realms of our responsibilities and influence. I believe many .NET shops rely on the tools sent down from above so heavily that we don’t really solve problems anymore. JP’s focus on problem solving and code katas from the course attack this deficiency at its core. I do somewhat blame our university Computer Science programs for not teaching real OO (a great discussion on formalism versus hermeneutics in a book I highly recommend, <a href="http://www.amazon.com/Object-Thinking-DV-Microsoft-Professional-David/dp/0735619654" target="_blank">Object Thinking</a>), but at some point we have to take what we were given and no matter our current standing, focus on sharpening our skills through practice and continuous learning. It boils down to individual responsibility for our current skill set and progression as a software craftsman. JP’s course does a terrific job of waking you up to that realization and inspiring you to be a better professional at your craft.</p>    <p>I have a few takeaways from the course that I’ll publicly spell out now. First, I (and hopefully our whole team) need to better understand design patterns and have them become integral to our code discussions. JP was all about efficiency in keystrokes and related dev tasks, and it seems natural that our language and code discussions could benefit from more efficient communication using design pattern terminology to convey a lot about a specific design concept in only a few words. Second, I hope that I (and our team again) can really put our tests to work for us, helping us recognize the problem to be solved or the behavior that needs to be captured, and then guiding us toward a simple solution. The third takeaway is related to that last part, and that is to have simple solutions that are distributed across simple object implementations (focusing on behaviors) that adhere to SOLID principles. It appears the key is to not focus on implementation specifics until the very last responsible moment; if done right, the implementations to create should be so clear cut and trivial, almost spelled right out in the tests themselves. It’s hard to put into words, but it seems crucial to focus first on the collaborators needed while designing code at the higher levels, finding ways to offload as much responsibility as possible (at least that’s what it felt like) onto dependencies that have yet to be designed and implemented. Designing Top-Down in this way gave such simple and elegant solutions that were totally extensible and adhered to the <a href="http://en.wikipedia.org/wiki/Open/closed_principle" target="_blank">Open/Closed Principle</a> better than any other code I have ever seen before. Perhaps as I blog more about this, I’ll be able to better put this style of coding into words (especially as I try to better understand it myself; it all seems so magical still!).</p>    <p>Overall, a great course that I highly recommend to all. JP has mentioned doing a similar course in Ruby, which I personally find especially interesting, given the same design/coding techniques would seem to run against a lot less friction compared to the heavy reliance on interfaces and mocking that C# require.</p>    <p>Stay tuned as I try to put some of this stuff into practice!</p> </span>  </div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Maybe Monad Extensions]]></title>
+    <link href="http://mkmurray.com/blog/2010/09/30/maybe-monad-extensions/"/>
+    <updated>2010-09-30T17:35:00-06:00</updated>
+    <id>http://mkmurray.com/blog/2010/09/30/maybe-monad-extensions</id>
+    <content type="html"><![CDATA[<div class='post'>
+<p>I learned a lot from <a href="http://murrayon.net/2010/09/maybe-from-murray-monads.html" target="_blank">my last foray into implementing my own Maybe Monad</a>.&#160; Apparently, it got noticed by and was actually useful to <a href="http://www.lostechies.com/members/derick.bailey/default.aspx" target="_blank">Derick Bailey</a>, as it was one of the resources he used in <a href="http://www.lostechies.com/blogs/derickbailey/archive/2010/09/29/monads-in-c-which-part-is-the-monad.aspx" target="_blank">his own personal exploration into Monads</a>.&#160; Of course, Derick did the topic a bit more justice, as he has a propensity to do.</p>  <p>Nonetheless, I have done as I said I would and reworked my Murray Monads into a cleaner, more concise implementation using extension methods, much like the implementation I introduced from Dmitri Nesteruk in the last post.&#160; So without further ado, I’d like to introduce you to the MaybeMonadExtensions.</p> <span class="fullpost">   <h4>Monads 2.0 - <a href="http://www.youtube.com/watch?v=ll7rWiY5obI&amp;t=1m19s" target="_blank">“These Go To Eleven”</a></h4>    <p>If you want to get an introduction to what Monads are and how I got to where I am today with this little library, then you really should check out <a href="http://murrayon.net/2010/09/maybe-from-murray-monads.html" target="_blank">the previous post on this topic</a>.&#160; I will however give a few brief code samples to show you what it can do to tidy up all those null checks using the Maybe Monad.</p>    <p>Here is code we tend to write all the time:</p>    <pre class="brush: csharp">string postCode;
+if (person != null)
+{
+  if (HasMedicalRecord(person) &amp;&amp; person.Address != null)
+  {
+    CheckAddress(person.Address);
+    if (person.Address.PostCode != null)
+      postCode = person.Address.PostCode.ToString();
+    else
+      postCode = &quot;UNKNOWN&quot;;
+  }
+}</pre>
+
+  <p>It can look like this with some Maybe Monad love:</p>
+
+  <pre class="brush: csharp">string postalCode = person.If(HasMedicalRecord)
+  .Access(p =&gt; p.Address)
+  .Apply(CheckAddress)
+  .Access(a =&gt; a.PostCode)
+  .Convert(pc =&gt; pc.ToString(), &quot;UNKNOWN&quot;);</pre>
+
+  <p>I know!&#160; Groovy, huh?!</p>
+
+  <p>The source can be found here:&#160; <a href="http://bitbucket.org/murrayondotnet/maybemonadextensions/">http://bitbucket.org/murrayondotnet/maybemonadextensions/</a></p>
+
+  <p>Let me know if you put this to good use!</p>
+</span>  </div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Omer Mor</div>
+<div class='content'>
+I see your point.<br />However, even Rx is sharing many LINQ operators with its IObservable &amp; IQbservable monads.<br />So we already have 4 different monads (IEnumerable, IQueryable, IObservable, IQbservable) using those operators. I don&#39;t think any more would hurt :-)</div>
+</div>
+<div class='comment'>
+<div class='author'>Mike Murray</div>
+<div class='content'>
+Great question. I suppose I could have used those names and it would likely be a familiar vernacular for .NET developers. I guess my only hesitation would be that I wouldn&#39;t necessarily want to confuse others who read the code into thinking that they are LINQ extension methods. My first thought when I saw your code was that somehow person was an IQueryable or IEnumerable, just because of those familiar method names.<br /><br />Great point though, and it does make me second guess my chosen names a bit. I did like Derick&#39;s method names too (especially just plain old &quot;Get&quot;). Thanks for posting!</div>
+</div>
+<div class='comment'>
+<div class='author'>Omer Mor</div>
+<div class='content'>
+Nice.<br /><br />Why didn&#39;t you choose the Linq terminology here?<br />I&#39;d write your example as this (Linq + Rx&#39;s Do operator):<br /><br /><br />string postalCode = person.Where(HasMedicalRecord)<br />  .Select(p =&gt; p.Address)<br />  .Do(CheckAddress)<br />  .Select(a =&gt; a.PostCode)<br />  .Select(pc =&gt; pc.ToString(), &quot;UNKNOWN&quot;);</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+</feed>

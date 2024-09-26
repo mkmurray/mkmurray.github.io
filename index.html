@@ -1,0 +1,747 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Mike Murray</title>
+	<meta name="author" content="Mike Murray">
+
+	
+	<meta name="description" content="Author&#8217;s Note: I do not take credit for the phrase used as the title of this
+blog post. It comes from Gary&#8217;s Ruby Conf 12 video &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="http://feeds.feedburner.com/mkmurray/" rel="alternate" title="Mike Murray" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	<link href='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/styles/shCore.min.css' rel='stylesheet' type='text/css'/>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/styles/shThemeRDark.min.css' rel='stylesheet' type='text/css'/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shCore.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shAutoloader.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushCpp.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushCSharp.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushCss.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushJScript.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushPlain.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushPowerShell.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushRuby.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushSql.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shBrushXml.min.js' type='text/javascript'></script>
+<script type='text/javascript'>
+     SyntaxHighlighter.config.bloggerMode = true;
+     SyntaxHighlighter.all();
+</script>
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/12/15/the-value-is-the-boundary/">The Value Is the Boundary</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-15T15:31:00-07:00" pubdate data-updated="true">Dec 15<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/code-organization/'>Code Organization</a>, <a class='category' href='/blog/categories/functional-programming/'>Functional Programming</a>, <a class='category' href='/blog/categories/mocking/'>Mocking</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2012/12/15/the-value-is-the-boundary/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<p><em>Author&#8217;s Note: I do not take credit for the phrase used as the title of this
+blog post. It comes from Gary&#8217;s Ruby Conf 12 video recording entitled
+<u>Boundaries</u> mentioned below and in the previous blog post.</em></p>
+
+<p>In the last blog post <a href="/blog/2012/12/08/testing-trade-offs/">Testing
+Trade-offs</a>, I talked about the
+difficulties of verifying the decisions and dependencies of our classes with the
+current mainstream testing methodologies. Based on a recorded conference talk by
+<a href="https://twitter.com/garybernhardt">Gary Bernhardt</a>, the focus was on
+effectively testing the logic a class contains and the dependent collobrators it
+takes in for coordinating with other classes and objects to perform its
+responsibilities. Mixing the two concerns in the same object definition requires
+utilizing both isolated unit testing and integration/integrated testing in order
+to adequately test cover the class. However, code designed this way seems to
+play to the weaknesses of each testing strategy just as much as it plays to
+their strengths (please see the previous blog post if you would like more
+details on that discussion).</p>
+
+<p>Today let&#8217;s go one step further and talk about ways that we could more cleanly
+separate the concerns of decisions and dependencies, with the hope that we can
+create objects that better lend themselves to one type of testing over the
+other. Gary proposes that a such a codebase could have better modularity,
+scalability, and even concurrency. I assert that your code will also be more
+maintainable and extensible as well. Most of today&#8217;s content will take a lesson
+from the functional programming paradigm, including practices they have espoused
+for decades.</p>
+
+<h2>Frictionless Isolated Unit Testing</h2>
+
+<p>If you wanted to test the mathematical addition operator (i.e., the plus sign
+<code>+</code>), what frameworks, tools, and/or coding tricks do you have to employ to
+sufficiently isolate it from all other concerns and objects? Absolutely nothing!
+There are no dependencies to mock or stub; it isolates for free. Why is that?
+Gary cautions against assuming it is because the addition operator is simple and
+lacks complexity. He digs deeper in order to identify two properities the
+implementation of plus sign exhibits that allows it to be naturally isolated.</p>
+
+<p>The first property is that the operator takes values as arguments and returns
+new values as output without any mutation. The second property is that the
+operator requires no dependencies in order to perform its computation and logic.
+Thus there is nothing to mock or stub when testing it, which was the major
+weakness of isolated unit testing. Also because of the lack of dependencies, no
+integrated tests are required in order to better test how the operator will
+behave in a production environment where there are no mocks and stubs. To test
+the addition operator we merely need to write simple pass-values-in,
+assert-value-out tests with no extra setup required.</p>
+
+<p>As Gary applies these concepts to existing code, we notice a few changes. Pieces
+of domain logic and pieces of code that coordinate dependencies are separated
+from each other, broken out into new objects created for a single purpose and
+responsibility. The nature of the communication between objects also changed,
+with values (inputs and outputs) becoming the boundary between objects instead
+of the emphasis being on several synchronous method calls. Value objects focused
+on data (and not behavior) become the new contract between collaborating
+classes.</p>
+
+<h2>To Be Continued&#8230;</h2>
+
+<p>You may notice that many of these concepts have a functional programming
+influence. The properties of immutability and focus on data at the boundaries
+allow us to write code that isolates very easily and lends itself very well to
+isolated unit testing that is simple and not brittle. It is very good at
+verifying the domain logic and decision paths of our objects. Of course, we
+can&#8217;t write the entirety of our codebase in this manner with no dependencies
+ever. Next time I will discuss a code architecture that Gary proposes which can
+utilize this style of code married with some more imperative glue code that
+coordinates the dependencies in the system. We will also discuss testing those
+portions of code as well.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/12/08/testing-trade-offs/">Testing Trade-offs</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-08T21:11:00-07:00" pubdate data-updated="true">Dec 8<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/code-organization/'>Code Organization</a>, <a class='category' href='/blog/categories/mocking/'>Mocking</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2012/12/08/testing-trade-offs/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<p>Last week our dev team at Extend Health watched a <a href="http://www.youtube.com/watch?v=yTkzNHF6rMs">RubyConf 2012 video of a talk
+entitled Boundaries</a> by <a href="https://twitter.com/garybernhardt">Gary
+Bernhardt</a> of <a href="https://www.destroyallsoftware.com/screencasts">Destroy All
+Software</a> (or perhaps even
+better known for the infamous <a href="https://www.destroyallsoftware.com/talks/wat">WAT lightning talk at CodeMash
+2012</a>). Gary proposes a very
+interesting code architecture that marries the individual benefits of
+immutability &amp; mutability, functional programming &amp; imperative object-oriented
+programming, isolated unit testing &amp; integration testing. He discusses the pros
+&amp; cons of each code design &amp; testing decision and the trade-offs that we end up
+dealing with. He suggests a potential solution that makes virtually no trade-off
+and attempts to harness the advantages of each of these methodologies that
+appear to be at odds with one another. I feel the idea has a lot of merit and I
+highly encourage everyone to watch his presentation to get the full context and
+a better logical progression of his proposal than what I can provide.</p>
+
+<h2>Isolated Unit Testing vs. Integration Testing</h2>
+
+<p>A common practice in unit testing classes and objects is to isolate the targeted
+class from its dependencies so that you can focus solely on its responsibilities
+and domain logic independent of any implementation details of the dependencies.
+This is typically accomplished by the use of stubs and mocks, which attempt to
+control and monitor the interactions with and data return from dependencies.
+There are a ton of gains afforded by this style of testing as Gary points out,
+but one very large criticism of this testing methodology is that it doesn&#8217;t
+exercise the code in the same way it would run in production. It is not exactly
+rare to have these isolated unit tests successfully pass and yet still have
+problems in production.</p>
+
+<p>Integration testing tends to better emulate production because it maintains the
+interaction relationships between objects in addition to acquiring and passing
+the data around the system in the same way. The criticism Gary puts forth of an
+integrated testing strategy is that it is very slow as you begin to attempt to
+cover all the code paths through the system. Consider trying to cover all
+logical branches through the system, including all branches of
+try/catch/finally, conditional, and looping structures. Gary suggests the growth
+in code to cover these scenarios is 2<sup>n<sup>,</sup></sup> where <code>n</code> is the number of branches.</p>
+
+<p>Many try to get the benefits of both types of testing in order to compensate for
+each strategy&#8217;s shortcomings. However, they still write code that doesn&#8217;t play
+to each testing methodolgy&#8217;s strengths. The strength of isolated unit testing is
+verifying that given certain inputs the expected output is always returned. The
+strength of integration testing is coordinating dependencies, making sure they
+utilize and interact with the API of other objects correctly. If you design your
+classes to be a mix of dependencies and logic, it becomes difficult to
+effectively test cover them without writing both sets of tests for all classes
+in your codebase.</p>
+
+<h2>So What?</h2>
+
+<p>OK, so you are probably wondering what the point is then. This sounds like a
+good plan to just be more disciplined in your test coverage, right? Well, let&#8217;s
+explore a way to better segregate dependency orchestration from actual logic and
+behavior. This could allow us to use the right testing methodology depending on
+which type of responsibility the object is meant to encapsulate: dependencies or
+decisions? Gary also asserts that it will lead us down a path that could yield a
+codebase with better modularity, scalability, and potentially even concurrency.
+I believe you can also add better maintainability and extensibility to that
+list.</p>
+
+<p>Next week I will dive into how Gary suggests we can better seperate these
+concerns of dependencies and decisions. Stay tuned (or go watch the video and
+spoil the surprise).</p>
+
+<p>Next post: <a href="/blog/2012/12/15/the-value-is-the-boundary/">The Value is the Boundary</a></p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/12/01/async-lambda-expressions-and-anonymous-delegates/">Async Lambda Expressions and Anonymous Delegates</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-01T22:34:00-07:00" pubdate data-updated="true">Dec 1<span>st</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/-net/'>.NET</a>, <a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/delegates/'>Delegates</a>, <a class='category' href='/blog/categories/microsoft/'>Microsoft</a>, <a class='category' href='/blog/categories/new-technology/'>New Technology</a>, <a class='category' href='/blog/categories/threading/'>Threading</a>, <a class='category' href='/blog/categories/visual-studio/'>Visual Studio</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2012/12/01/async-lambda-expressions-and-anonymous-delegates/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<p>I&#8217;ve known about the new <code>async</code> and <code>await</code> keywords in C# 5 for a while now,
+but I saw a use of it I hadn&#8217;t anticipated. I saw Jon Skeet create an
+asyncronous lambda expression and was caught a bit off guard. After thinking
+about it, it really isn&#8217;t that amazing, but I thought I would spread the word
+anyway because I think it could be a really handy feature.</p>
+
+<p>Anonymous functions are declared without a method name and can be passed around
+and invoked at will. Lambda expression syntax creates anonymous functions that
+can be used as delegates or expression trees. In C# 5, you can adorn functions
+with the <code>async</code> keyword which signifies that the function will return a <code>Task</code>
+object from the Task Parallel Library as a return value. You will also find
+somewhere in the method body the keyword <code>await</code> next to a statement that could
+take a while to process and be a blocking operation. Now your method can resume
+operation after the asyncronous operation has completed and has its result.</p>
+
+<p>Here is a simple example:</p>
+
+<pre class="brush: csharp">
+    public void ButtonClick()
+    {
+        ProcessFiles();
+    }
+
+    private async void ProcessFiles()
+    {
+        var files = new string[] { "file1.txt", "file2.txt", "file3.txt" };
+
+        foreach (var file in files)
+        {
+            var fileContents = await ReadTextAsync(file);
+            // likely do something with file contents
+        }
+    }
+
+    private async Task&lt;string&gt; ReadTextAsync(string filePath)
+    {
+        // Some text reading implementation that supports the TPL
+    }
+</pre>
+
+
+<p>The button click handler method would return at the first sign of a blocking
+operation and callback delegates are set up under the covers by the compiler to
+finish executing the rest of the code after the blocking process finishes.</p>
+
+<p>Here is the same example but using an async lambda expression:</p>
+
+<pre class="brush: csharp">
+    public void ButtonClick()
+    {
+        var files = new string[] { "file1.txt", "file2.txt", "file3.txt" };
+
+        files.ForEach(async file => await ReadTextAsync(file));
+    }
+
+    private async Task&lt;string&gt; ReadTextAsync(string filePath)
+    {
+        // Some text reading implementation that supports the TPL
+    }
+</pre>
+
+
+<p>Please overlook my disregard of single responsibility and encapsulation, and so
+on so forth. This is an overly simplified example intended solely to show what
+the syntax looks like. Either way, I could see this lighter weight syntax coming
+in handy in the future.</p>
+
+<p>In the same example where I saw async lambda syntax used, I also saw Jon Skeet
+show off a really clever extension method that took an enumerable collection of
+<code>Task</code> objects and reordered them so they could be enumerated and handled in the
+order that they complete their asynchronous operations. Perhaps I will show that
+piece of code next time.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/11/17/well-rounded-developers/">Well-Rounded Developers</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-17T19:32:00-07:00" pubdate data-updated="true">Nov 17<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/effective-teamwork/'>Effective Teamwork</a>, <a class='category' href='/blog/categories/job-satisfaction/'>Job Satisfaction</a>, <a class='category' href='/blog/categories/self-improvement/'>Self-Improvement</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2012/11/17/well-rounded-developers/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<p>I had the opportunity this week to talk with some terrific Computer Science
+students nearing graduation and who were beginning to look for employment. It
+provided me the chance to put into words the amazing culture and environment
+that exists at my workplace. The software development team at <a href="https://www.extendhealth.com/">Extend
+Health</a> is second to none in both talent and
+passion for creating clean, modular code that is maintainable because of its
+extensibility. Everyone on the team contributes and has a trusted voice. It
+truly is an environment I&#8217;ve never seen before and am certainly proud to be
+apart of.</p>
+
+<p>One of the main things that hit me while talking to these graduating students
+was how well-rounded our developers have come. No, I&#8217;m not talking about the
+amount of soda and treats we consume. I&#8217;m referring to the varying skills each
+one of us have developed. From front-end to back-end or web sites to desktop
+apps, every single member of the team is capable of jumping into any of our
+codebases and tackling new features or bugs with a excellent degree of
+competentcy. I find this fascinating because it is not the norm at many medium
+to large size companies. It is typical for a developer to be hired to a
+position or team where he or she works on a single project and codebase for a
+few years until they get bored enough to change positions within the company or
+go somewhere else completely. This has not been the case for all of the
+developers at Extend Health.</p>
+
+<p>We are currently divided into four teams of about four or five devs each. While
+each team may have past experience with a certain project or codebase, they are
+not automatically the chosen team to work on it again the next time. Because of
+this, there is shared knowledge across teams and team members, instead of all
+the knowledge residing in only one person&#8217;s head. This avoids the &#8220;what if
+someone gets hit by a bus&#8221; problem <a href="http://rhauert.wordpress.com/2012/11/17/the-bus-factor/">my coworker Ryan just blogged
+about</a>. The other side
+effect is that our developers have all become well-rounded in varying languages
+and platforms, solving both front-end and back-end problems. Contrast this with
+how I used to classify my dev skill set four or five years ago before working
+at Extend Health. I used to consider myself a back-end systems developer,
+feeling it was important to have specialization in order to differentiate myself
+and provide a chance to develop focused and in-depth experience. I also fooled
+myself into thinking that I preferred this designation because web development
+was trivial and only the hardest and most worthwhile problems were in the
+back-end systems. Instead, I merely lacked some meaningful experience with
+front-end web development, which is harder to come by in the typical work
+enivronment I described above. However in my current employment, I&#8217;ve become a
+much more well-rounded software developer.</p>
+
+<p>I&#8217;m not entirely positive if our environment and team dynamic were
+intentionally setup to ensure we were all well-rounded developers (though every
+other good aspect of our dev culture seems to have been carefully pieced
+together by <a href="http://coreykaylor.com/">Corey</a>). Regardless, I am appreciatevly
+taking note of the advantageous results of such a configuration. This is one
+very important aspect of true job satisfaction and also in avoiding high
+turnover and attrition in workforce.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/11/10/refactoring-legacy-code-starts-with-test-coverage/">Refactoring Legacy Code Starts With Test Coverage</a></h1>
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-10T15:37:00-07:00" pubdate data-updated="true">Nov 10<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/legacy-code/'>Legacy Code</a>, <a class='category' href='/blog/categories/refactoring/'>Refactoring</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2012/11/10/refactoring-legacy-code-starts-with-test-coverage/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<div class="entry-content">
+		<p>As a dev team, we have been watching and discussing various training videos and
+conference talks every morning for a few months now. This week we watched a
+recorded conference talk by Ruby developer <a href="http://kytrinyx.com/">Katrina Owen</a>
+entitled <a href="http://www.youtube.com/watch?v=J4dlF0kcThQ">Therapeutic Refactoring</a>.
+I was especially impressed with her strategy for refactoring legacy code.</p>
+
+<p>I&#8217;m sure everyone can agree that the safest way to refactor code and be 100%
+positive that the functionality hasn&#8217;t regressed is to have a good suite of
+tests. And if you don&#8217;t have sufficient test coverage (or any at all), then now
+is the right time to add it before refactoring.</p>
+
+<p>However, I have found myself skipping this step in the past, feeling justified
+because the quality of the code was so poor or the deadline was so short. It is
+irresponsible of me to assume that I have not changed the functionality of the
+code without proof in the form of passing tests that sufficiently cover all
+scenarios and use cases.  Nonetheless, watching Katrina&#8217;s presentation has
+given me renewed commitment and a sound plan of attack against legacy code that
+may be ugly and very unfamiliar to me.</p>
+
+<p>Here is the example method that Katrina uses during her presentation (which is
+later revealed as a piece of code that she vaguely remembers coding herself and
+now abhors):</p>
+
+<pre class="brush: ruby">
+    module XYZService
+
+      def self.xyz_filename(target)
+        # File format:
+        # [day of month zero-padded][three-letter prefix] \
+        # _[kind]_[age_if_kind_personal]_[target.id] \
+        # _[8 random chars]_[10 first chars of title].jpg
+        filename = "#{target.publish_on.strftime("%d")}"
+        filename << "#{target.xyz_category_prefix}"
+        filename << "#{target.kind.gsub("_", "")}"
+        filename << "_%03d" % (target.age || 0) if target.personal?
+        filename << "_#{target.id.to_s}"
+        filename << "_#{Digest::SHA1.hexdigest(rand(10000).to_s)[0,8]}"
+        truncated_title = target.title.gsub(/[^\[a-z\]]/i, '').downcase
+        truncate_to = truncated_title.length > 9 ? 9 : truncated_title.length
+        filename << "_#{truncated_title[0..(truncate_to)]}"
+        filename << ".jpg"
+        return filename
+      end
+
+    end
+</pre>
+
+
+<p>It certainly isn&#8217;t the worst lines of code ever written and it is getting the
+job done, but it is definitely not very readable and quite difficult to
+understand its purpose and logic. About the only thing that can be discerned is
+that it is intended to generate a filename in a specific format.</p>
+
+<p>Katrina starts by writing a very simple and seemingly useless test (which she
+calls a &#8220;Mickey Mouse test&#8221; in her GitHub commit message) in order to begin test
+coverage of this method:</p>
+
+<pre class="brush: ruby">
+    require_relative './xyz_service'
+
+    describe XYZService do
+
+      let(:target) do
+        stub(:target)
+      end
+
+      subject { XYZService.xyz_filename(target) }
+
+      it 'works' do
+        subject.should eq('something')
+      end
+
+    end
+</pre>
+
+
+<p>Without much knowledge of what this method&#8217;s purpose or inputs are, we can only
+pass in an empty stub object as input and then assert something rediculous for
+the result. We expect this test to not only fail to pass, but it is also likely
+to error during runtime (or even at compile time if in a statically typed
+language like C#). The idea is to create a quick feedback loop that aids us in
+finding the context and inputs required to make the code execute without runtime
+error. Then we can finally see the actual return value and modify our dummy
+assertion to begin expecting that output.</p>
+
+<p>After iterating in this fashion, Katrina arrives at the following test which is
+a bit more useful:</p>
+
+<pre class="brush: ruby">
+    require_relative './xyz_service'
+    require 'date'
+
+    describe XYZService do
+
+      let(:target) do
+        messages = {
+          :publish_on => Date.new(2012, 3, 14),
+          :xyz_category_prefix => 'abc',
+          :kind => 'unicorn',
+          :personal? => false,
+          :id => 1337,
+          :title => 'magic & superglue'
+        }
+        stub(:target, messages)
+      end
+
+      subject { XYZService.xyz_filename(target) }
+
+      it 'works' do
+        subject.should eq('14abcunicorn_1337_cb6c53bc_magicsuper.jpg')
+      end
+
+    end
+</pre>
+
+
+<p>However, this test doesn&#8217;t pass because the <code>cb6c53bc</code> portion of the resultant
+filename is different every execution of the test. A simple regex allows the
+test to pass all of the time:</p>
+
+<pre class="brush: ruby">
+    subject.should match(/14abcunicorn_1337_[0-9a-f]{8}_magicsuper\.jpg/)
+</pre>
+
+
+<p>Even though we now have a passing test, we have not yet exercised the different
+input values and all code paths and branches through the method. This must be
+done in order to fully understand, document, and test cover the logic and
+purpose of the method. This would be done in the normal unit testing fashion
+that is shown in just about every testing demo by adding more test scenarios and
+assertions that excercise the varying use cases.</p>
+
+<p>One interesting development that occurred while Katrina was using this process
+was that she actually found a bug in the implementation of the original
+<code>xyz_filename</code> method, specifically an extra set of braces in the regex on line
+14.</p>
+
+<p>Now that we are fully covered with tests (and a bug fixed), we are free to
+refactor the code into smaller, more readable chunks of code logic that are more
+cohesive and more reusable as well. This is what Katrina does for the remainder
+of her presentation, and it is just as instructive as this first part. However,
+today I wanted to focus on her strategy for writing test coverage against a
+legacy codebase.</p>
+
+<p>I like how what Katrina is demonstrating seems to utilize a black box testing
+approach at first, and then progresses to a more white box approach as we begin
+to explore the different parts of the implementation. Perhaps such a strategy
+should have been obvious to me, but Katrina&#8217;s conference talk really struck a
+chord with me and encouraged me to commit to doing better with test coverage in
+legacy codebases before I begin making modifications or additions.</p>
+
+<p>I highly recommend viewing the entire video, as it is only 30 minutes long and
+an entertaining watch.</p>
+
+		
+		
+	</div>
+
+</article>
+
+<nav id="pagenavi">
+    
+    
+        <a href="/blog/page/2/" class="next">Next</a>
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav></div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2012
+
+    Mike Murray
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+</footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'mkmurray';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-36228026-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+		<div class="left-col">
+			<header id="header" class="inner"><div class="profilepic">	
+	<img src="/images/mkmurray.jpg" alt="Profile Picture">
+</div>
+<h1><a href="/">Mike Murray</a></h1>
+<nav id="main-nav"><ul class="main">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories">Categories</a></li>
+</ul>
+
+<br />
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:mkmurray.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+
+</nav>
+<br/>
+<h3 class="alignleft">please code responsibly</h3>
+<br/>
+<br/>
+<br/>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/mkmurray" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/109073345657761090655?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/mkmurray" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/mkmurray" title="GitHub">GitHub</a>
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/mkmurray">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="http://feeds.feedburner.com/mkmurray/" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+</header>				
+		</div>	
+	</div>
+</body>
+</html>
